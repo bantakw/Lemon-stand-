@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lemon Stand — محاكاة مشروع الليمونادة</title>
+<style>
+  body { font-family: system-ui, -apple-system, Segoe UI, Tahoma, Arial, sans-serif; margin: 0; background:#fafafa; color:#111;}
+  header { background:#f7d65a; padding:16px 20px; border-bottom: 2px solid #e0c23f;}
+  h1 { margin:0; font-size: 22px;}
+  main { display: grid; grid-template-columns: 1fr 380px; gap: 16px; padding: 16px; }
+  @media (max-width: 980px){ main{ grid-template-columns: 1fr; } }
+  .card { background:#fff; border:1px solid #e5e5e5; border-radius: 10px; padding: 14px; box-shadow: 0 1px 0 rgba(0,0,0,.04);}
+  .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:end;}
+  label{ display:block; font-size:13px; color:#333; margin-bottom:6px;}
+  input, select { width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:14px; background:#fff;}
+  .grid-3{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;}
+  .grid-2{ display:grid; grid-template-columns: repeat(2, 1fr); gap:10px;}
+  .btn { padding: 10px 14px; border:0; border-radius: 8px; cursor:pointer; font-weight:600; }
+  .btn-primary{ background:#111; color:#fff; }
+  .btn-secondary{ background:#f1f1f1; }
+  .muted{ color:#666; font-size:13px; }
+  table{ width:100%; border-collapse: collapse; }
+  th, td{ padding:8px; border-bottom:1px solid #eee; text-align: center; font-size:13px;}
+  .pill{ display:inline-block; padding:4px 8px; border-radius:999px; background:#f3f3f3; font-size:12px; }
+  .ok{ background:#e6f7ed; }
+  .bad{ background:#fde8e8; }
+  .warn{ background:#fff7e6; }
+  footer{ padding: 10px 16px; color:#666; font-size:12px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🍋 Lemon Stand — محاكاة مشروع الليمونادة</h1>
+    <div class="muted">نسخة تعليمية سريعة تحاكي لعبة Apple II الكلاسيكية مع تحسينات بسيطة.</div>
+  </header>
+
+  <main>
+    <section class="card">
+      <div id="status">
+        <div class="row">
+          <div><strong>اليوم:</strong> <span id="day">1</span> / <span id="totalDays">12</span></div>
+          <div><strong>الطقس المتوقع:</strong> <span id="weatherLabel"></span> <span class="muted" id="weatherNote"></span></div>
+        </div>
+        <div class="row" style="margin-top:6px;">
+          <div class="pill">💰 الرصيد: <span id="cash">50.00</span> $</div>
+          <div class="pill">👥 عملاء محتملون: <span id="potential">-</span></div>
+        </div>
+      </div>
+
+      <hr/>
+
+      <div class="grid-3">
+        <div>
+          <label>سعر الكوب ($)</label>
+          <input type="number" id="price" step="0.05" min="0" value="0.5">
+        </div>
+        <div>
+          <label>اللافتات الإعلانية (عدد)</label>
+          <input type="number" id="ads" step="1" min="0" value="0">
+          <div class="muted">التكلفة: 1$ لكل لافتة</div>
+        </div>
+        <div>
+          <label>أكواب تُحضَّر اليوم (عدد)</label>
+          <input type="number" id="cupsToMake" step="1" min="0" value="30">
+          <div class="muted">يرتبط ذلك بالمخزون والوصفة.</div>
+        </div>
+      </div>
+
+      <h3>الوصفة (لكل كوب)</h3>
+      <div class="grid-3">
+        <div>
+          <label>ليمون (حبة/كوب)</label>
+          <input type="number" id="lemonsPerCup" step="0.1" min="0" value="0.5">
+        </div>
+        <div>
+          <label>سكر (ملعقة/كوب)</label>
+          <input type="number" id="sugarPerCup" step="0.1" min="0" value="0.6">
+        </div>
+        <div>
+          <label>ثلج (قطع/كوب)</label>
+          <input type="number" id="icePerCup" step="1" min="0" value="3">
+        </div>
+      </div>
+
+      <h3>شراء المستلزمات</h3>
+      <div class="grid-3">
+        <div>
+          <label>شراء ليمون (0.10$/حبة)</label>
+          <input type="number" id="buyLemons" step="1" min="0" value="0">
+        </div>
+        <div>
+          <label>شراء سكر (0.05$/ملعقة)</label>
+          <input type="number" id="buySugar" step="1" min="0" value="0">
+        </div>
+        <div>
+          <label>شراء أكواب (0.03$/كوب)</label>
+          <input type="number" id="buyCups" step="1" min="0" value="0">
+        </div>
+      </div>
+      <div class="grid-3" style="margin-top:10px;">
+        <div>
+          <label>شراء ثلج (0.01$/قطعة)</label>
+          <input type="number" id="buyIce" step="1" min="0" value="0">
+        </div>
+        <div>
+          <label>هدر الثلج (يومي، %)</label>
+          <input type="number" id="iceMeltPct" step="1" min="0" max="100" value="30">
+          <div class="muted">الثلج يذوب نهاية اليوم (لا يتراكم).</div>
+        </div>
+        <div>
+          <label>أقصى سعة خدمة بالساعة</label>
+          <input type="number" id="serviceRate" step="1" min="10" value="60">
+          <div class="muted">تأثير طوابير الانتظار.</div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:14px;">
+        <button class="btn btn-primary" id="runDay">تشغيل يوم البيع</button>
+        <button class="btn btn-secondary" id="endGame">إنهاء مبكر</button>
+      </div>
+      <div class="muted" style="margin-top:10px;">نصيحة: السعر المرتفع يقلل الطلب، لكن الوصفة الجيدة والإعلان والطقس الحار ترفع الطلب.</div>
+    </section>
+
+    <aside class="card">
+      <h3>المخزون</h3>
+      <div class="grid-2">
+        <div class="pill">🍋 ليمون: <span id="invLemons">50</span></div>
+        <div class="pill">🧂 سكر: <span id="invSugar">80</span></div>
+        <div class="pill">🥤 أكواب: <span id="invCups">80</span></div>
+        <div class="pill">🧊 ثلج: <span id="invIce">200</span></div>
+      </div>
+      <hr/>
+      <h3>تقرير اليوم</h3>
+      <table id="dailyTable">
+        <thead>
+          <tr>
+            <th>اليوم</th><th>طقس</th><th>سعر</th><th>إعلان</th><th>الزبائن</th><th>المبيعات</th><th>الإيراد</th><th>المصروف</th><th>الربح</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <hr/>
+      <div><strong>الربح الإجمالي:</strong> <span id="totalProfit">0.00</span> $</div>
+    </aside>
+  </main>
+
+  <section class="card" style="margin: 0 16px 16px 16px;">
+    <h3>الأحداث والسجل</h3>
+    <div id="log" style="white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:13px; background:#111; color:#f1f1f1; padding:10px; border-radius:8px; max-height: 300px; overflow:auto;"></div>
+  </section>
+
+  <footer>© 2025 — نموذج تعليمي. هذه النسخة تحاكي النسخة الكلاسيكية (1973/1979) مع إضافات طفيفة.</footer>
+
+<script>
+(function(){
+  const totalDays = 12;
+  let state = {
+    day: 1,
+    cash: 50.00,
+    inv: { lemons: 50, sugar: 80, cups: 80, ice: 200 },
+    totalProfit: 0,
+  };
+
+  const weatherTypes = [
+    {name:"☀️ حار جدًا", demandBase: 120, priceTolerance: 0.9, note:"طلب مرتفع جدًا"},
+    {name:"🌤️ مشمس",   demandBase: 100, priceTolerance: 1.0, note:"أفضل أجواء للبيع"},
+    {name:"⛅️ غائم",    demandBase: 80,  priceTolerance: 1.05, note:"طلب متوسط"},
+    {name:"🌧️ ممطر",    demandBase: 55,  priceTolerance: 1.15, note:"طلب ضعيف"},
+    {name:"⛈️ عاصف",    demandBase: 25,  priceTolerance: 1.3, note:"احتمال إلغاء اليوم"}
+  ];
+
+  const $ = (id)=>document.getElementById(id);
+  $("totalDays").textContent = totalDays;
+
+  function format(n){ return Number(n).toFixed(2); }
+
+  function pickWeather(){
+    // احتمالات تقريبية: حار جدًا 10%، مشمس 40%، غائم 25%، ممطر 15%، عاصف 10%
+    const r=Math.random();
+    if(r<0.10) return weatherTypes[0];
+    if(r<0.50) return weatherTypes[1];
+    if(r<0.75) return weatherTypes[2];
+    if(r<0.90) return weatherTypes[3];
+    return weatherTypes[4];
+  }
+
+  let todayWeather = pickWeather();
+  function renderStatus(){
+    $("day").textContent = state.day;
+    $("cash").textContent = format(state.cash);
+    $("invLemons").textContent = state.inv.lemons;
+    $("invSugar").textContent  = state.inv.sugar;
+    $("invCups").textContent   = state.inv.cups;
+    $("invIce").textContent    = state.inv.ice;
+    $("weatherLabel").textContent = todayWeather.name;
+    $("weatherNote").textContent = " — " + todayWeather.note;
+  }
+
+  function log(msg){
+    const now = new Date().toLocaleTimeString();
+    $("log").textContent += `[${now}] ${msg}\n`;
+    $("log").scrollTop = $("log").scrollHeight;
+  }
+
+  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+  function runDay(){
+    const price = parseFloat($("price").value||0);
+    const ads = parseInt($("ads").value||0);
+    const cupsToMake = parseInt($("cupsToMake").value||0);
+
+    const lemonsPerCup = parseFloat($("lemonsPerCup").value||0);
+    const sugarPerCup  = parseFloat($("sugarPerCup").value||0);
+    const icePerCup    = parseInt($("icePerCup").value||0);
+
+    const buyLemons = parseInt($("buyLemons").value||0);
+    const buySugar  = parseInt($("buySugar").value||0);
+    const buyCups   = parseInt($("buyCups").value||0);
+    const buyIce    = parseInt($("buyIce").value||0);
+
+    const iceMeltPct = clamp(parseInt($("iceMeltPct").value||0),0,100);
+    const serviceRate = Math.max(10, parseInt($("serviceRate").value||0));
+
+    // الأسعار
+    const costLemon = 0.10, costSugar = 0.05, costCup=0.03, costIce=0.01, costAd=1.00;
+
+    // تحقق الرصيد لشراء المستلزمات
+    const purchaseCost = buyLemons*costLemon + buySugar*costSugar + buyCups*costCup + buyIce*costIce + ads*costAd;
+    if(purchaseCost > state.cash){
+      log("❌ لا يوجد رصيد كافٍ لعملية الشراء والإعلان.");
+      return;
+    }
+
+    // تنفيذ الشراء
+    state.cash -= purchaseCost;
+    state.inv.lemons += buyLemons;
+    state.inv.sugar  += buySugar;
+    state.inv.cups   += buyCups;
+    state.inv.ice    += buyIce;
+
+    // إنتاج الأكواب وفق الوصفة والمخزون
+    const maxByLemons = Math.floor(state.inv.lemons / lemonsPerCup);
+    const maxBySugar  = Math.floor(state.inv.sugar  / sugarPerCup);
+    const maxByIce    = Math.floor(state.inv.ice    / icePerCup);
+    const maxByCups   = state.inv.cups;
+    const maxPossible = Math.min(maxByLemons, maxBySugar, maxByIce, maxByCups);
+
+    const cupsReady = Math.min(cupsToMake, maxPossible);
+    if(cupsReady < cupsToMake){
+      log("⚠️ تم إنتاج عدد أقل بسبب قيود المخزون.");
+    }
+
+    // خصم مكونات الإنتاج
+    state.inv.lemons -= Math.ceil(cupsReady * lemonsPerCup);
+    state.inv.sugar  -= Math.ceil(cupsReady * sugarPerCup);
+    state.inv.ice    -= Math.ceil(cupsReady * icePerCup);
+    state.inv.cups   -= cupsReady;
+
+    // حساب الطلب الأساسي
+    const base = todayWeather.demandBase;
+
+    // تأثير السعر: نقطة مرجعية 0.5$
+    const priceRef = 0.5 * todayWeather.priceTolerance;
+    let priceFactor = (price<=priceRef) ? 1 + (priceRef-price)*0.8 : Math.max(0.1, 1 - (price-priceRef)*1.3);
+    priceFactor = clamp(priceFactor, 0.1, 2.2);
+
+    // تأثير الإعلان
+    let adsFactor = 1 + Math.min(ads*0.06, 1.0);
+
+    // جودة الوصفة (نطاقات مبسطة)
+    const ideal = { lemons:0.6, sugar:0.6, ice:3 };
+    const recipeScore = (
+      1 - Math.min( Math.abs(lemonsPerCup-ideal.lemons)/0.6, 1 )*0.35
+      - Math.min( Math.abs(sugarPerCup-ideal.sugar)/0.6, 1 )*0.35
+      - Math.min( Math.abs(icePerCup-ideal.ice)/3, 1 )*0.20
+    );
+    const recipeFactor = clamp(0.6 + recipeScore, 0.5, 1.3);
+
+    // أحداث عشوائية (مستوحاة من النسخة الكلاسيكية)
+    let eventFactor = 1.0;
+    let eventText = "";
+    const r = Math.random();
+    if(todayWeather.name.includes("⛈️")){
+      if(r < 0.40){ // احتمال إلغاء اليوم
+        eventFactor = 0.0;
+        eventText = "⛈️ عاصفة ألغت حركة الشارع بالكامل!";
+      }
+    } else if(r < 0.06){
+      eventFactor = 0.4; eventText = "🚧 إغلاق شارع مجاور خفّض الحركة.";
+    } else if(r >= 0.06 && r < 0.10){
+      eventFactor = 0.7; eventText = "🎉 مهرجان قريب زاد الازدحام لكن زادت المنافسة.";
+    }
+
+    // عدد العملاء المحتملين قبل قيود الخدمة
+    let potential = Math.floor(base * priceFactor * adsFactor * recipeFactor * eventFactor);
+    $("potential").textContent = potential>0? potential: 0;
+
+    // قيود الخدمة (طابور) — نفترض 8 ساعات بيع
+    const capacity = serviceRate * 8;
+    const served = Math.min(potential, capacity, cupsReady);
+
+    // المبيعات
+    const revenue = served * price;
+
+    // تحديث النقد
+    state.cash += revenue;
+
+    // أرباح/خسائر اليوم
+    // تكلفة الإنتاج كانت ضمن خصم المخزون من الشراء؛ هنا نحتسب فقط المصاريف النقدية (المشتريات+الإعلان).
+    const dayCost = purchaseCost;
+    const profit = revenue - dayCost;
+    state.totalProfit += profit;
+
+    // إذابة الثلج المتبقي
+    const melt = Math.floor(state.inv.ice * (iceMeltPct/100));
+    state.inv.ice = Math.max(0, state.inv.ice - melt);
+
+    // سجل
+    const dayIdx = state.day;
+    log(`اليوم ${dayIdx}: طقس ${todayWeather.name} — سعر ${price.toFixed(2)}$ — إعلان ${ads} — جهزت ${cupsReady} كوب — خدمنا ${served} / ${potential} عميل — إيراد ${revenue.toFixed(2)}$ — مصروف ${dayCost.toFixed(2)}$ — ربح ${profit.toFixed(2)}$.`);
+    if(eventText) log("حدث: " + eventText);
+    if(cupsReady>served) log(`📦 تبقى ${cupsReady-served} كوب لم يُباع.`);
+    if(melt>0) log(`🧊 ذاب ${melt} من الثلج المتبقي.`);
+
+    // جدول اليوم
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${dayIdx}</td><td>${todayWeather.name}</td><td>${price.toFixed(2)}</td><td>${ads}</td><td>${potential}</td><td>${served}</td><td>${revenue.toFixed(2)}</td><td>${dayCost.toFixed(2)}</td><td>${profit.toFixed(2)}</td>`;
+    document.querySelector("#dailyTable tbody").appendChild(tr);
+
+    $("totalProfit").textContent = format(state.totalProfit);
+
+    // اليوم التالي
+    state.day += 1;
+    if(state.day>totalDays){
+      endGame();
+    }else{
+      todayWeather = pickWeather();
+      renderStatus();
+    }
+  }
+
+  function endGame(){
+    $("runDay").disabled = true;
+    $("endGame").disabled = true;
+    log(`🏁 انتهت اللعبة. الربح الإجمالي: ${format(state.totalProfit)}$. الرصيد النهائي: ${format(state.cash)}$.`);
+    alert("انتهت اللعبة! انظر السجل والجدول لمعرفة أداءك.");
+  }
+
+  $("runDay").addEventListener("click", runDay);
+  $("endGame").addEventListener("click", endGame);
+
+  renderStatus();
+})();
+</script>
+</body>
+</html>
